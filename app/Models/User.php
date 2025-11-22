@@ -52,6 +52,38 @@ class User extends Authenticatable
     return $this->belongsToMany(Role::class);
   }
 
+  public function hasRole(string $roleCode): bool
+  {
+    return $this->hasAnyRole([$roleCode]);
+  }
+
+  /**
+   * @param  array<int, string>|string  $roleCodes
+   */
+  public function hasAnyRole(array|string $roleCodes): bool
+  {
+    $normalizedCodes = collect(is_array($roleCodes) ? $roleCodes : func_get_args())
+      ->flatMap(function (string $value): array {
+        return preg_split('/[\\,\\|\\/]+/', $value) ?: [];
+      })
+      ->filter()
+      ->map(fn (string $code): string => strtolower(trim($code)))
+      ->unique()
+      ->values();
+
+    if ($normalizedCodes->isEmpty()) {
+      return false;
+    }
+
+    if ($this->relationLoaded('roles')) {
+      return $this->roles->contains(
+        fn (Role $role): bool => $normalizedCodes->contains(strtolower($role->code))
+      );
+    }
+
+    return $this->roles()->whereIn('code', $normalizedCodes)->exists();
+  }
+
   public function streamerProfile()
   {
     return $this->hasOne(StreamerProfile::class);
