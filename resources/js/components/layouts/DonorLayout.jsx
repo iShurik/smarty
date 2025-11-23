@@ -1,35 +1,39 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+import { Card, Col, Nav, Row } from 'react-bootstrap';
 
 const navItems = [
-    { to: '/donor', label: 'Мои донаты' },
-    { to: '/donor/favorites', label: 'Избранные стримеры' },
-    { to: '/donor/history', label: 'История платежей' },
+  { to: '/donor', label: 'Мои донаты' },
+  { to: '/donor/favorites', label: 'Избранные стримеры' },
+  { to: '/donor/history', label: 'История платежей' },
 ];
 
 export default function DonorLayout() {
-    return (
-        <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
-            <aside className="rounded-lg border bg-white p-4 shadow-sm">
-                <h2 className="mb-3 text-sm font-semibold text-slate-700">Донатор</h2>
-                <nav className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-                    {navItems.map((item) => (
-                        <NavLink
-                            key={item.to}
-                            to={item.to}
-                            className={({ isActive }) =>
-                                `rounded px-3 py-2 transition hover:bg-slate-50 ${isActive ? 'bg-slate-100 text-blue-700' : ''}`
-                            }
-                            end
-                        >
-                            {item.label}
-                        </NavLink>
-                    ))}
-                </nav>
-            </aside>
-            <section className="rounded-lg border bg-white p-6 shadow-sm">
-                <Outlet />
-            </section>
-        </div>
-    );
+  return (
+    <Row className="g-4">
+      <Col lg={3}>
+        <Card className="shadow-sm h-100">
+          <Card.Body>
+            <Card.Title className="mb-3 text-uppercase text-muted" style={{ fontSize: '0.85rem' }}>
+              Донатор
+            </Card.Title>
+            <Nav className="flex-column" variant="pills">
+              {navItems.map((item) => (
+                <Nav.Link key={item.to} as={NavLink} to={item.to} end>
+                  {item.label}
+                </Nav.Link>
+              ))}
+            </Nav>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col lg={9}>
+        <Card className="shadow-sm">
+          <Card.Body>
+            <Outlet />
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
+  );
 }

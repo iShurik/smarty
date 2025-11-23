@@ -1,31 +1,38 @@
 import React from 'react';
+import { Card, Stack } from 'react-bootstrap';
 
 const payments = [
-    { provider: 'Stripe', amount: '$10', status: 'succeeded', createdAt: '10.09' },
-    { provider: 'PayPal', amount: '$5', status: 'refunded', createdAt: '07.09' },
+  { provider: 'Stripe', amount: '$10', status: 'succeeded', createdAt: '10.09' },
+  { provider: 'PayPal', amount: '$5', status: 'refunded', createdAt: '07.09' },
 ];
 
 export default function DonorHistoryPage() {
-    return (
-        <div className="space-y-4">
-            <div>
-                <h1 className="text-xl font-semibold text-slate-900">История платежей</h1>
-                <p className="text-slate-700">Реестр транзакций донатора и статусы возвратов.</p>
-            </div>
-            <div className="space-y-3">
-                {payments.map((payment) => (
-                    <div key={payment.provider + payment.createdAt} className="flex items-center justify-between rounded-lg border bg-slate-50 p-4">
-                        <div>
-                            <p className="text-sm font-semibold text-slate-900">{payment.provider}</p>
-                            <p className="text-xs text-slate-600">{payment.createdAt}</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-sm font-semibold text-slate-800">{payment.amount}</p>
-                            <p className="text-xs text-slate-600">{payment.status}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+  return (
+    <Stack gap={3}>
+      <div>
+        <h1 className="section-title fs-4 mb-1">История платежей</h1>
+        <p className="section-subtitle">Реестр транзакций донатора и статусы возвратов.</p>
+      </div>
+      <Stack gap={3}>
+        {payments.map((payment) => (
+          <Card key={payment.provider + payment.createdAt} className="shadow-sm">
+            <Card.Body className="d-flex align-items-center justify-content-between">
+              <div>
+                <Card.Title className="mb-1 fs-6">{payment.provider}</Card.Title>
+                <Card.Text className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>
+                  {payment.createdAt}
+                </Card.Text>
+              </div>
+              <div className="text-end">
+                <div className="fw-semibold">{payment.amount}</div>
+                <div className="text-muted" style={{ fontSize: '0.9rem' }}>
+                  {payment.status}
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        ))}
+      </Stack>
+    </Stack>
+  );
 }

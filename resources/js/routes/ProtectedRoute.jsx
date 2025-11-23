@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { Spinner } from 'react-bootstrap';
 import { useAuth } from '../auth/AuthContext';
 
 export default function ProtectedRoute({ allowedRoles, children }) {
@@ -8,8 +9,8 @@ export default function ProtectedRoute({ allowedRoles, children }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-10 text-sm text-slate-600">
-        Проверяем авторизацию…
+      <div className="d-flex align-items-center justify-content-center py-5 text-muted">
+        <Spinner animation="border" size="sm" className="me-2" /> Проверяем авторизацию…
       </div>
     );
   }

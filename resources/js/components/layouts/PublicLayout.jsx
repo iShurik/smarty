@@ -1,52 +1,52 @@
 import React from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Container, Nav, Navbar, Button } from 'react-bootstrap';
 import { useAuth } from '../../auth/AuthContext';
 
 export default function PublicLayout() {
-    const { user, logout } = useAuth();
+  const { user, logout } = useAuth();
 
-    return (
-        <div className="min-h-screen bg-slate-50 text-slate-900">
-            <header className="border-b bg-white shadow-sm">
-                <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-                    <Link to="/" className="text-lg font-semibold text-blue-600">
-                        StreamKit
-                    </Link>
-                    <nav className="flex items-center gap-4 text-sm font-medium text-slate-700">
-                        <NavLink className={({ isActive }) => (isActive ? 'text-blue-600' : '')} to="/">
-                            Главная
-                        </NavLink>
-                        <NavLink className={({ isActive }) => (isActive ? 'text-blue-600' : '')} to="/streamer">
-                            Кабинет стримера
-                        </NavLink>
-                        <NavLink className={({ isActive }) => (isActive ? 'text-blue-600' : '')} to="/donor">
-                            Кабинет донатора
-                        </NavLink>
-                        <NavLink className={({ isActive }) => (isActive ? 'text-blue-600' : '')} to="/admin">
-                            Админка
-                        </NavLink>
-                        {user ? (
-                            <button
-                                type="button"
-                                onClick={logout}
-                                className="rounded bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-800 hover:bg-slate-200"
-                            >
-                                Выйти ({user.name})
-                            </button>
-                        ) : (
-                            <Link
-                                to="/login"
-                                className="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700"
-                            >
-                                Войти
-                            </Link>
-                        )}
-                    </nav>
-                </div>
-            </header>
-            <main className="mx-auto max-w-6xl px-4 py-10">
-                <Outlet />
-            </main>
-        </div>
-    );
+  return (
+    <div className="min-vh-100 bg-light">
+      <Navbar bg="white" expand="lg" className="border-bottom shadow-sm">
+        <Container>
+          <Navbar.Brand as={Link} to="/" className="fw-semibold text-primary">
+            StreamKit
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="main-nav" />
+          <Navbar.Collapse id="main-nav" className="justify-content-between">
+            <Nav className="me-auto" navbarScroll>
+              <Nav.Link as={NavLink} to="/" end>
+                Главная
+              </Nav.Link>
+              <Nav.Link as={NavLink} to="/streamer">
+                Кабинет стримера
+              </Nav.Link>
+              <Nav.Link as={NavLink} to="/donor">
+                Кабинет донатора
+              </Nav.Link>
+              <Nav.Link as={NavLink} to="/admin">
+                Админка
+              </Nav.Link>
+            </Nav>
+            <div className="d-flex align-items-center gap-2">
+              {user ? (
+                <Button variant="outline-secondary" size="sm" onClick={logout}>
+                  Выйти ({user.name})
+                </Button>
+              ) : (
+                <Button as={Link} to="/login" size="sm" variant="primary">
+                  Войти
+                </Button>
+              )}
+            </div>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+
+      <Container className="py-4 py-md-5">
+        <Outlet />
+      </Container>
+    </div>
+  );
 }

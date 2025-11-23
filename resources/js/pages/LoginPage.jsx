@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Alert, Button, ButtonGroup, Card, Col, Form, Row } from 'react-bootstrap';
 import { useAuth } from '../auth/AuthContext';
 
 const registerRoles = [
@@ -63,126 +64,136 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-xl space-y-4 rounded-lg border bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-wide text-slate-500">Авторизация</p>
-          <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
+    
+    <Card className="shadow-sm">
+      <Card.Body>
+        <div className="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <div className="text-uppercase text-muted" style={{ fontSize: '0.75rem' }}>
+              Авторизация
+            </div>
+            <Card.Title className="mb-0">{title}</Card.Title>
+          </div>
+          <ButtonGroup size="sm">
+            <Button
+              variant={mode === 'login' ? 'primary' : 'outline-secondary'}
+              onClick={() => setMode('login')}
+            >
+              Вход
+            </Button>
+            <Button
+              variant={mode === 'register' ? 'primary' : 'outline-secondary'}
+              onClick={() => setMode('register')}
+            >
+              Регистрация
+            </Button>
+          </ButtonGroup>
         </div>
-        <div className="flex gap-2 text-xs font-semibold text-slate-700">
-          <button
-            type="button"
-            onClick={() => setMode('login')}
-            className={`rounded px-3 py-1 ${mode === 'login' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100'}`}
-          >
-            Вход
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('register')}
-            className={`rounded px-3 py-1 ${
-              mode === 'register' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100'
-            }`}
-          >
-            Регистрация
-          </button>
-        </div>
-      </div>
 
-      <p className="text-sm text-slate-700">
-        Работаем через email и пароль для локальной разработки. Позже добавятся OAuth провайдеры (Twitch, Google,
-        Telegram и др.) — интерфейс под это уже предусмотрен.
-      </p>
+        <p className="section-subtitle mb-3">
+          Работаем через email и пароль для локальной разработки. Позже добавятся OAuth провайдеры (Twitch, Google,
+          Telegram и др.) — интерфейс под это уже предусмотрен.
+        </p>
 
-      {error && <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {mode === 'register' && (
-          <label className="block space-y-1 text-sm font-medium text-slate-800">
-            <span>Имя</span>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              className="w-full rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-              required
-            />
-            {validationErrors.name && <p className="text-xs text-red-600">{validationErrors.name.join(', ')}</p>}
-          </label>
+        {error && (
+          <Alert variant="danger" className="py-2">
+            {error}
+          </Alert>
         )}
 
-        <label className="block space-y-1 text-sm font-medium text-slate-800">
-          <span>Email</span>
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            className="w-full rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-            required
-          />
-          {validationErrors.email && <p className="text-xs text-red-600">{validationErrors.email.join(', ')}</p>}
-        </label>
-
-        <label className="block space-y-1 text-sm font-medium text-slate-800">
-          <span>Пароль</span>
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            className="w-full rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-            required
-          />
-          {validationErrors.password && (
-            <p className="text-xs text-red-600">{validationErrors.password.join(', ')}</p>
-          )}
-        </label>
-
-        {mode === 'register' && (
-          <>
-            <label className="block space-y-1 text-sm font-medium text-slate-800">
-              <span>Подтверждение пароля</span>
-              <input
-                type="password"
-                name="password_confirmation"
-                value={form.password_confirmation}
+        <Form onSubmit={handleSubmit}>
+          {mode === 'register' && (
+            <Form.Group className="mb-3" controlId="registerName">
+              <Form.Label>Имя</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                value={form.name}
                 onChange={handleChange}
-                className="w-full rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                isInvalid={Boolean(validationErrors.name)}
                 required
               />
-            </label>
+            {validationErrors.name && (
+                <Form.Control.Feedback type="invalid">
+                  {validationErrors.name.join(', ')}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+          )}
+          <Form.Group className="mb-3" controlId="loginEmail">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              isInvalid={Boolean(validationErrors.email)}
+              required
+            />
+            {validationErrors.email && (
+              <Form.Control.Feedback type="invalid">
+                {validationErrors.email.join(', ')}
+              </Form.Control.Feedback>
+            )}
+          </Form.Group>
 
-            <label className="block space-y-1 text-sm font-medium text-slate-800">
-              <span>Я регистрируюсь как</span>
-              <select
-                name="role"
-                value={form.role}
-                onChange={handleChange}
-                className="w-full rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-            >
-                {registerRoles.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </>
-        )}
+          <Form.Group className="mb-3" controlId="loginPassword">
+            <Form.Label>Пароль</Form.Label>
+            <Form.Control
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              isInvalid={Boolean(validationErrors.password)}
+              required
+            />
+            {validationErrors.password && (
+              <Form.Control.Feedback type="invalid">
+                {validationErrors.password.join(', ')}
+              </Form.Control.Feedback>
+            )}
+          </Form.Group>
 
-        <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="inline-flex items-center rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
-          >
-            {submitting ? 'Отправка…' : mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
-          </button>
-          <p className="text-xs text-slate-500">Сессия хранится через Sanctum-токен в localStorage.</p>
-        </div>
-      </form>
-    </div>
+          {mode === 'register' && (
+            <>
+              <Form.Group className="mb-3" controlId="passwordConfirmation">
+                <Form.Label>Подтверждение пароля</Form.Label>
+                <Form.Control
+                  type="password"
+                  name="password_confirmation"
+                  value={form.password_confirmation}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="registerRole">
+                <Form.Label>Я регистрируюсь как</Form.Label>
+                <Form.Select name="role" value={form.role} onChange={handleChange}>
+                  {registerRoles.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </>
+          )}
+
+          <Row className="align-items-center g-3 mt-1">
+            <Col xs="auto">
+              <Button type="submit" disabled={submitting} variant="primary">
+                {submitting ? 'Отправка…' : mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
+              </Button>
+            </Col>
+            <Col>
+              <div className="text-muted" style={{ fontSize: '0.85rem' }}>
+                Сессия хранится через Sanctum-токен в localStorage.
+              </div>
+            </Col>
+          </Row>
+        </Form>
+      </Card.Body>
+    </Card>
   );
 }

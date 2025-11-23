@@ -1,19 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Button, Card, Stack } from 'react-bootstrap';
 
 export default function UnauthorizedPage() {
-    return (
-        <div className="space-y-4 rounded-lg border bg-white p-6 shadow-sm">
-            <h1 className="text-2xl font-semibold text-slate-900">Нет доступа</h1>
-            <p className="text-slate-700">У вас нет прав на просмотр этой секции. Выберите другую роль или вернитесь на главную.</p>
-            <div className="flex gap-3">
-                <Link className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white" to="/">
-                    На главную
-                </Link>
-                <Link className="rounded border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800" to="/login">
-                    Сменить роль
-                </Link>
-            </div>
-        </div>
-    );
+  return (
+    <Card className="shadow-sm">
+      <Card.Body>
+        <Card.Title className="section-title fs-3 mb-2">Нет доступа</Card.Title>
+        <Card.Text className="section-subtitle mb-3">
+          У вас нет прав на просмотр этой секции. Выберите другую роль или вернитесь на главную.
+        </Card.Text>
+        <Stack direction="horizontal" gap={2}>
+          <Button as={Link} to="/" variant="primary">
+            На главную
+          </Button>
+          <Button as={Link} to="/login" variant="outline-secondary">
+            Сменить роль
+          </Button>
+        </Stack>
+      </Card.Body>
+    </Card>
+  );
 }

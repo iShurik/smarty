@@ -1,30 +1,33 @@
 import React from 'react';
+import { Badge, Card, Stack } from 'react-bootstrap';
 
 const favorites = [
-    { name: 'StreamerOne', status: 'Онлайн', rules: 'TTS + YouTube' },
-    { name: 'StreamerTwo', status: 'Оффлайн', rules: 'Только мем-клипы' },
+  { name: 'StreamerOne', status: 'Онлайн', rules: 'TTS + YouTube' },
+  { name: 'StreamerTwo', status: 'Оффлайн', rules: 'Только мем-клипы' },
 ];
 
 export default function DonorFavoritesPage() {
-    return (
-        <div className="space-y-4">
-            <div>
-                <h1 className="text-xl font-semibold text-slate-900">Избранные стримеры</h1>
-                <p className="text-slate-700">Быстрый доступ к страницам донатов и активным правилам.</p>
-            </div>
-            <div className="space-y-3">
-                {favorites.map((fav) => (
-                    <div key={fav.name} className="flex items-center justify-between rounded-lg border bg-slate-50 p-4">
-                        <div>
-                            <p className="text-sm font-semibold text-slate-900">{fav.name}</p>
-                            <p className="text-xs text-slate-600">{fav.rules}</p>
-                        </div>
-                        <span className={`text-xs font-semibold ${fav.status === 'Онлайн' ? 'text-green-600' : 'text-slate-500'}`}>
-                            {fav.status}
-                        </span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+  return (
+    <Stack gap={3}>
+      <div>
+        <h1 className="section-title fs-4 mb-1">Избранные стримеры</h1>
+        <p className="section-subtitle">Быстрый доступ к страницам донатов и активным правилам.</p>
+      </div>
+      <Stack gap={3}>
+        {favorites.map((fav) => (
+          <Card key={fav.name} className="shadow-sm">
+            <Card.Body className="d-flex align-items-center justify-content-between">
+              <div>
+                <Card.Title className="mb-1 fs-6">{fav.name}</Card.Title>
+                <Card.Text className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>
+                  {fav.rules}
+                </Card.Text>
+              </div>
+              <Badge bg={fav.status === 'Онлайн' ? 'success' : 'secondary'}>{fav.status}</Badge>
+            </Card.Body>
+          </Card>
+        ))}
+      </Stack>
+    </Stack>
+  );
 }

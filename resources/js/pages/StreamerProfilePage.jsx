@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { useAuth } from '../auth/AuthContext';
 
 export default function StreamerProfilePage() {
@@ -85,99 +86,128 @@ export default function StreamerProfilePage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="d-flex flex-column gap-3">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Профиль стримера</h1>
-        <p className="text-slate-700">
+        <h1 className="section-title fs-4 mb-1">Профиль стримера</h1>
+        <p className="section-subtitle">
           Базовые настройки страницы донатов: отображаемое имя, страна, публичный slug и минимальная сумма доната.
         </p>
       </div>
 
       {loading ? (
-        <div className="rounded-lg border bg-slate-50 p-4 text-sm text-slate-700">Загрузка профиля…</div>
+        <Card className="shadow-sm">
+          <Card.Body className="text-muted d-flex align-items-center gap-2">
+            <Spinner animation="border" size="sm" /> Загрузка профиля…
+          </Card.Body>
+        </Card>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>}
-          {success && (
-            <div className="rounded border border-green-200 bg-green-50 p-3 text-sm text-green-800">{success}</div>
-          )}
+        <Card className="shadow-sm">
+          <Card.Body>
+            {error && (
+              <Alert variant="danger" className="py-2">
+                {error}
+              </Alert>
+            )}
+            {success && (
+              <Alert variant="success" className="py-2">
+                {success}
+              </Alert>
+            )}
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="space-y-1 text-sm font-medium text-slate-800">
-              <span>Отображаемое имя</span>
-              <input
-                type="text"
-                name="display_name"
-                value={form.display_name}
-                onChange={handleChange}
-                className="w-full rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                required
-              />
-              {validationErrors.display_name && (
-                <p className="text-xs text-red-600">{validationErrors.display_name.join(', ')}</p>
-              )}
-            </label>
+            <Form onSubmit={handleSubmit}>
+              <Row className="g-3">
+                <Col md={6}>
+                  <Form.Group controlId="displayName">
+                    <Form.Label>Отображаемое имя</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="display_name"
+                      value={form.display_name}
+                      onChange={handleChange}
+                      isInvalid={Boolean(validationErrors.display_name)}
+                      required
+                    />
+                    {validationErrors.display_name && (
+                      <Form.Control.Feedback type="invalid">
+                        {validationErrors.display_name.join(', ')}
+                      </Form.Control.Feedback>
+                    )}
+                  </Form.Group>
+                </Col>
 
-            <label className="space-y-1 text-sm font-medium text-slate-800">
-              <span>Страна (ISO-2)</span>
-              <input
-                type="text"
-                name="country_code"
-                value={form.country_code}
-                onChange={handleChange}
-                maxLength={2}
-                className="w-full uppercase rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                required
-              />
-              {validationErrors.country_code && (
-                <p className="text-xs text-red-600">{validationErrors.country_code.join(', ')}</p>
-              )}
-            </label>
+                <Col md={6}>
+                  <Form.Group controlId="countryCode">
+                    <Form.Label>Страна (ISO-2)</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="country_code"
+                      value={form.country_code}
+                      onChange={handleChange}
+                      maxLength={2}
+                      className="text-uppercase"
+                      isInvalid={Boolean(validationErrors.country_code)}
+                      required
+                    />
+                    {validationErrors.country_code && (
+                      <Form.Control.Feedback type="invalid">
+                        {validationErrors.country_code.join(', ')}
+                      </Form.Control.Feedback>
+                    )}
+                  </Form.Group>
+                </Col>
 
-            <label className="space-y-1 text-sm font-medium text-slate-800">
-              <span>Slug страницы донатов</span>
-              <input
-                type="text"
-                name="slug"
-                value={form.slug}
-                onChange={handleChange}
-                className="w-full rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                required
-              />
-              {validationErrors.slug && (
-                <p className="text-xs text-red-600">{validationErrors.slug.join(', ')}</p>
-              )}
-            </label>
+                <Col md={6}>
+                  <Form.Group controlId="slug">
+                    <Form.Label>Slug страницы донатов</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="slug"
+                      value={form.slug}
+                      onChange={handleChange}
+                      isInvalid={Boolean(validationErrors.slug)}
+                      required
+                    />
+                    {validationErrors.slug && (
+                      <Form.Control.Feedback type="invalid">
+                        {validationErrors.slug.join(', ')}
+                      </Form.Control.Feedback>
+                    )}
+                  </Form.Group>
+                </Col>
 
-            <label className="space-y-1 text-sm font-medium text-slate-800">
-              <span>Минимальная сумма доната</span>
-              <input
-                type="number"
-                name="min_amount"
-                value={form.min_amount}
-                min={0}
-                step="0.01"
-                onChange={handleChange}
-                className="w-full rounded border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                required
-              />
-              {validationErrors.min_amount && (
-                <p className="text-xs text-red-600">{validationErrors.min_amount.join(', ')}</p>
-              )}
-            </label>
-          </div>
+                <Col md={6}>
+                  <Form.Group controlId="minAmount">
+                    <Form.Label>Минимальная сумма доната</Form.Label>
+                    <Form.Control
+                      type="number"
+                      name="min_amount"
+                      value={form.min_amount}
+                      min={0}
+                      step="0.01"
+                      onChange={handleChange}
+                      isInvalid={Boolean(validationErrors.min_amount)}
+                      required
+                    />
+                    {validationErrors.min_amount && (
+                      <Form.Control.Feedback type="invalid">
+                        {validationErrors.min_amount.join(', ')}
+                      </Form.Control.Feedback>
+                    )}
+                  </Form.Group>
+                </Col>
+              </Row>
 
-          <div className="flex items-center gap-3 text-sm text-slate-700">
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
-            >
-              {saving ? 'Сохранение…' : 'Сохранить профиль'}
-            </button>
-            <span className="text-xs text-slate-500">Работает только для авторизованных стримеров.</span>
-          </div>
-        </form>
+              <div className="d-flex align-items-center gap-3 mt-3">
+                <Button type="submit" disabled={saving} variant="primary">
+                  {saving ? 'Сохранение…' : 'Сохранить профиль'}
+                </Button>
+                <span className="text-muted" style={{ fontSize: '0.9rem' }}>
+                  Работает только для авторизованных стримеров.
+                </span>
+              </div>
+            </Form>
+          </Card.Body>
+        </Card>
       )}
     </div>
   );
