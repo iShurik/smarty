@@ -18,6 +18,7 @@ class AuthController extends Controller
       'name' => ['required', 'string', 'max:255'],
       'email' => ['required', 'email', 'max:255', 'unique:users,email'],
       'password' => ['required', 'string', 'min:8', 'confirmed'],
+      'role' => ['required', 'string', 'in:streamer,donor'],
     ]);
 
     $user = User::create([
@@ -26,7 +27,7 @@ class AuthController extends Controller
       'password' => Hash::make($validated['password']),
     ]);
 
-    $primaryRoleCode = $validated['role'] ?? 'donor';
+    $primaryRoleCode = $validated['role'];
 
     $rolesToAttach = collect([$primaryRoleCode, 'donor'])
       ->unique()
