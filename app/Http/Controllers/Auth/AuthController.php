@@ -12,74 +12,82 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
+  public function register(Request $request): JsonResponse
+  {
+    $validated = $request->validate([
+      'name' => ['required', 'string', 'max:255'],
+      'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+      'password' => ['required', 'string', 'min:8', 'confirmed'],
+    ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => $validated['password'],
-        ]);
+    $user = User::create([
+      'name' => $validated['name'],
+      'email' => $validated['email'],
+      'password' => Hash::make($validated['password']),
+    ]);
 
-        $donorRole = Role::firstOrCreate(
-            ['code' => 'donor'],
-            ['title' => 'Donor']
+    $primaryRoleCode = $validated['role'] ?? 'donor';
+
+    $rolesToAttach = collect([$primaryRoleCode, 'donor'])
+      ->unique()
+      ->map(function (string $code) {
+        return Role::firstOrCreate(
+          ['code' => $code],
+          ['title' => ucfirst($code)]
         );
+      })
+      ->pluck('id')
+      ->all();
 
-        $user->roles()->syncWithoutDetaching([$donorRole->id]);
+    $user->roles()->syncWithoutDetaching($rolesToAttach);
 
-        $token = $user->createToken('spa')->plainTextToken;
+    $token = $user->createToken('spa')->plainTextToken;
 
-        return response()->json([
-            'token' => $token,
-            'user' => $user->load('roles'),
-        ], 201);
+    return response()->json([
+      'token' => $token,
+      'user' => $user->load('roles'),
+    ], 201);
+  }
+
+  public function login(Request $request): JsonResponse
+  {
+    $validated = $request->validate([
+      'email' => ['required', 'email'],
+      'password' => ['required', 'string'],
+    ]);
+
+    /** @var User|null $user */
+    $user = User::where('email', $validated['email'])->first();
+
+    if (! $user || ! Hash::check($validated['password'], $user->password)) {
+      throw ValidationException::withMessages([
+        'email' => __('auth.failed'),
+      ]);
     }
 
-    public function login(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+    $token = $user->createToken('spa')->plainTextToken;
 
-        /** @var User|null $user */
-        $user = User::where('email', $validated['email'])->first();
+    return response()->json([
+      'token' => $token,
+      'user' => $user->load('roles'),
+    ]);
+  }
 
-        if (! $user || ! Hash::check($validated['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
-            ]);
-        }
+  public function me(Request $request): JsonResponse
+  {
+    return response()->json([
+      'user' => $request->user()->load('roles'),
+    ]);
+  }
 
-        $token = $user->createToken('spa')->plainTextToken;
+  public function logout(Request $request): JsonResponse
+  {
+    $token = $request->user()?->currentAccessToken();
 
-        return response()->json([
-            'token' => $token,
-            'user' => $user->load('roles'),
-        ]);
+    if ($token) {
+      $token->delete();
     }
 
-    public function me(Request $request): JsonResponse
-    {
-        return response()->json([
-            'user' => $request->user()->load('roles'),
-        ]);
-    }
-
-    public function logout(Request $request): JsonResponse
-    {
-        $token = $request->user()?->currentAccessToken();
-
-        if ($token) {
-            $token->delete();
-        }
-
-        return response()->json(status: 204);
-    }
+    return response()->json(status: 204);
+  }
 }
