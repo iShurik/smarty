@@ -27,20 +27,12 @@ class AuthController extends Controller
       'password' => Hash::make($validated['password']),
     ]);
 
-    $primaryRoleCode = $validated['role'];
+     $primaryRole = Role::firstOrCreate(
+      ['code' => $validated['role']],
+      ['title' => ucfirst($validated['role'])]
+    );
 
-    $rolesToAttach = collect([$primaryRoleCode, 'donor'])
-      ->unique()
-      ->map(function (string $code) {
-        return Role::firstOrCreate(
-          ['code' => $code],
-          ['title' => ucfirst($code)]
-        );
-      })
-      ->pluck('id')
-      ->all();
-
-    $user->roles()->syncWithoutDetaching($rolesToAttach);
+    $user->roles()->sync([$primaryRole->id]);
 
     $token = $user->createToken('spa')->plainTextToken;
 
