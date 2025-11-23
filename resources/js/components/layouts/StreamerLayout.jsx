@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 
 const navItems = [
     { to: '/streamer', label: 'Дашборд' },
+    { to: '/streamer/profile', label: 'Профиль' },
     { to: '/streamer/goals', label: 'Цели' },
     { to: '/streamer/media', label: 'Медиа' },
     { to: '/streamer/moderation', label: 'Модерация' },

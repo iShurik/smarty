@@ -15,6 +15,7 @@ import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import NotFoundPage from '../pages/NotFoundPage';
 import StreamerDashboard from '../pages/StreamerDashboard';
+import StreamerProfilePage from '../pages/StreamerProfilePage';
 import StreamerGoalsPage from '../pages/StreamerGoalsPage';
 import StreamerMediaPage from '../pages/StreamerMediaPage';
 import StreamerModerationPage from '../pages/StreamerModerationPage';
@@ -37,6 +38,7 @@ export default function AppRoutes() {
                     }
                 >
                     <Route index element={<StreamerDashboard />} />
+                    <Route path="profile" element={<StreamerProfilePage />} />
                     <Route path="goals" element={<StreamerGoalsPage />} />
                     <Route path="media" element={<StreamerMediaPage />} />
                     <Route path="moderation" element={<StreamerModerationPage />} />
