@@ -13,6 +13,8 @@ const normalizeProfileForm = (profile = {}) => ({
       : '',
 });
 
+const extractProfileFromResponse = (responseData = {}) => responseData.data ?? responseData;
+
 export default function StreamerProfilePage() {
   const { user } = useAuth();
   const [form, setForm] = useState(() => normalizeProfileForm());
@@ -30,8 +32,9 @@ export default function StreamerProfilePage() {
 
       try {
         const { data } = await axios.get('/api/v1/streamer/profile');
+        const profile = extractProfileFromResponse(data);
 
-        setForm(normalizeProfileForm(data));
+        setForm(normalizeProfileForm(profile));
       } catch (err) {
         setError(
           err.response?.data?.message ||
@@ -67,8 +70,9 @@ export default function StreamerProfilePage() {
       };
 
       const { data } = await axios.put('/api/v1/streamer/profile', payload);
+      const profile = extractProfileFromResponse(data);
 
-      setForm(normalizeProfileForm(data));
+      setForm(normalizeProfileForm(profile));
       setSuccess('Профиль сохранён.');
     } catch (err) {
       if (err.response?.data?.errors) {
