@@ -3,14 +3,19 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { useAuth } from '../auth/AuthContext';
 
+const normalizeProfileForm = (profile = {}) => ({
+  display_name: profile.display_name ?? '',
+  country_code: profile.country_code ?? '',
+  slug: profile.slug ?? '',
+  min_amount:
+    profile.min_amount !== undefined && profile.min_amount !== null
+      ? String(profile.min_amount)
+      : '',
+});
+
 export default function StreamerProfilePage() {
   const { user } = useAuth();
-  const [form, setForm] = useState({
-    display_name: '',
-    country_code: '',
-    slug: '',
-    min_amount: '',
-  });
+  const [form, setForm] = useState(() => normalizeProfileForm());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -26,12 +31,7 @@ export default function StreamerProfilePage() {
       try {
         const { data } = await axios.get('/api/v1/streamer/profile');
 
-        setForm({
-          display_name: data.display_name ?? '',
-          country_code: data.country_code ?? '',
-          slug: data.slug ?? '',
-          min_amount: data.min_amount ?? '',
-        });
+        setForm(normalizeProfileForm(data));
       } catch (err) {
         setError(
           err.response?.data?.message ||
@@ -68,12 +68,7 @@ export default function StreamerProfilePage() {
 
       const { data } = await axios.put('/api/v1/streamer/profile', payload);
 
-      setForm({
-        display_name: data.display_name,
-        country_code: data.country_code,
-        slug: data.slug,
-        min_amount: data.min_amount,
-      });
+      setForm(normalizeProfileForm(data));
       setSuccess('Профиль сохранён.');
     } catch (err) {
       if (err.response?.data?.errors) {
