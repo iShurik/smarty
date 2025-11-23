@@ -4,12 +4,19 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-    plugins: [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.jsx'],
-            refresh: true,
-        }),
-        react(),
-        tailwindcss(),
-    ],
+  server: {
+    host: '0.0.0.0',
+    port: 5174,
+    strictPort: true,
+    origin: 'http://192.168.1.13:5174',
+    cors: true,
+  },
+  plugins: [
+    laravel({
+      input: ['resources/css/app.css', 'resources/js/app.jsx'],
+      refresh: true,
+    }),
+    react(),
+    tailwindcss(),
+  ],
 });
