@@ -18,6 +18,7 @@ import StreamerDashboard from '../pages/StreamerDashboard';
 import StreamerProfilePage from '../pages/StreamerProfilePage';
 import StreamerGoalsPage from '../pages/StreamerGoalsPage';
 import StreamerMediaPage from '../pages/StreamerMediaPage';
+import StreamerRulesPage from '../pages/StreamerRulesPage';
 import StreamerModerationPage from '../pages/StreamerModerationPage';
 import UnauthorizedPage from '../pages/UnauthorizedPage';
 
@@ -41,6 +42,7 @@ export default function AppRoutes() {
                     <Route path="profile" element={<StreamerProfilePage />} />
                     <Route path="goals" element={<StreamerGoalsPage />} />
                     <Route path="media" element={<StreamerMediaPage />} />
+                    <Route path="rules" element={<StreamerRulesPage />} />
                     <Route path="moderation" element={<StreamerModerationPage />} />
                 </Route>
 

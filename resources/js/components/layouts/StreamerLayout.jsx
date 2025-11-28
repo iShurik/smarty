@@ -7,6 +7,7 @@ const navItems = [
   { to: '/streamer/profile', label: 'Профиль' },
   { to: '/streamer/goals', label: 'Цели' },
   { to: '/streamer/media', label: 'Медиа' },
+  { to: '/streamer/rules', label: 'Правила' },
   { to: '/streamer/moderation', label: 'Модерация' },
 ];
 
