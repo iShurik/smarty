@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Streamer\StreamerProfileController;
 use App\Http\Controllers\TtsVoiceController;
+use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -21,5 +22,6 @@ Route::prefix('v1')->group(function (): void {
     Route::put('profile', [StreamerProfileController::class, 'update']);
   });
 
-  Route::get('tts/voices', [TtsVoiceController::class, 'index']);  
+  Route::get('tts/voices', [TtsVoiceController::class, 'index']);
+  Route::get('tags', [TagController::class, 'index']);
 });
