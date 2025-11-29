@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\MediaFileController;
 use App\Http\Controllers\Streamer\StreamerRulesController;
 use App\Http\Controllers\Streamer\StreamerProfileController;
 use App\Http\Controllers\TtsVoiceController;
@@ -26,6 +27,8 @@ Route::prefix('v1')->group(function (): void {
     Route::put('rules/banned-meme-tags', [StreamerRulesController::class, 'updateBannedMemeTags']);
     Route::put('rules/banned-youtube-videos', [StreamerRulesController::class, 'updateBannedYoutubeVideos']);    
   });
+
+  Route::middleware('auth:sanctum')->post('media-files', [MediaFileController::class, 'store']);
 
   Route::get('tts/voices', [TtsVoiceController::class, 'index']);
   Route::get('tags', [TagController::class, 'index']);
