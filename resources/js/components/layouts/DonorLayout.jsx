@@ -6,6 +6,7 @@ const navItems = [
   { to: '/donor', label: 'Мои донаты' },
   { to: '/donor/favorites', label: 'Избранные стримеры' },
   { to: '/donor/history', label: 'История платежей' },
+  { to: '/donor/memes', label: 'Предложить мем' },
 ];
 
 export default function DonorLayout() {

@@ -5,14 +5,25 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Meme\StoreMemeClipRequest;
 use App\Models\MemeClip;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class MemeClipController extends Controller
 {
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
+    $status = $request->query('status', MemeClip::STATUS_APPROVED);
+
+    if (!in_array($status, [MemeClip::STATUS_APPROVED, MemeClip::STATUS_SUBMITTED, MemeClip::STATUS_REJECTED], true)) {
+      abort(422, 'Некорректный статус мемов.');
+    }
+
+    if ($status !== MemeClip::STATUS_APPROVED && $request->user() === null) {
+      abort(403, 'Необходимо войти для просмотра этой очереди.');
+    }
+
     $memes = MemeClip::query()
-      ->approved()
-      ->with(['file', 'tags'])
+      ->when($status === MemeClip::STATUS_APPROVED, fn ($query) => $query->approved(), fn ($query) => $query->where('status', $status))
+      ->with(['file', 'tags', 'suggestedBy'])
       ->orderByDesc('created_at')
       ->get();
 
@@ -47,6 +58,7 @@ class MemeClipController extends Controller
       'title' => $clip->title,
       'duration_sec' => $clip->duration_sec,
       'status' => $clip->status,
+      'suggested_by' => $clip->suggestedBy?->only(['id', 'name']),
       'file' => [
         'id' => $clip->file->id,
         'disk' => $clip->file->disk,

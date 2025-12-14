@@ -19,6 +19,9 @@ export default function PublicLayout() {
               <Nav.Link as={NavLink} to="/" end>
                 Главная
               </Nav.Link>
+              <Nav.Link as={NavLink} to="/memes">
+                Мемы
+              </Nav.Link>
               <Nav.Link as={NavLink} to="/streamer">
                 Кабинет стримера
               </Nav.Link>

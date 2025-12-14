@@ -11,8 +11,10 @@ import AdminOverviewPage from '../pages/AdminOverviewPage';
 import DonorDashboard from '../pages/DonorDashboard';
 import DonorFavoritesPage from '../pages/DonorFavoritesPage';
 import DonorHistoryPage from '../pages/DonorHistoryPage';
+import DonorSuggestMemePage from '../pages/DonorSuggestMemePage';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
+import MemeGalleryPage from '../pages/MemeGalleryPage';
 import NotFoundPage from '../pages/NotFoundPage';
 import StreamerDashboard from '../pages/StreamerDashboard';
 import StreamerProfilePage from '../pages/StreamerProfilePage';
@@ -21,6 +23,7 @@ import StreamerMediaPage from '../pages/StreamerMediaPage';
 import StreamerRulesPage from '../pages/StreamerRulesPage';
 import StreamerModerationPage from '../pages/StreamerModerationPage';
 import UnauthorizedPage from '../pages/UnauthorizedPage';
+import AdminMemeModerationPage from '../pages/AdminMemeModerationPage';
 
 export default function AppRoutes() {
     return (
@@ -29,6 +32,7 @@ export default function AppRoutes() {
                 <Route index element={<HomePage />} />
                 <Route path="login" element={<LoginPage />} />
                 <Route path="unauthorized" element={<UnauthorizedPage />} />
+                <Route path="memes" element={<MemeGalleryPage />} />
 
                 <Route
                     path="streamer/*"
@@ -57,6 +61,7 @@ export default function AppRoutes() {
                     <Route index element={<DonorDashboard />} />
                     <Route path="favorites" element={<DonorFavoritesPage />} />
                     <Route path="history" element={<DonorHistoryPage />} />
+                    <Route path="memes" element={<DonorSuggestMemePage />} />
                 </Route>
 
                 <Route
@@ -69,6 +74,7 @@ export default function AppRoutes() {
                 >
                     <Route index element={<AdminOverviewPage />} />
                     <Route path="moderation" element={<AdminModerationPage />} />
+                    <Route path="memes" element={<AdminMemeModerationPage />} />
                     <Route path="catalogs" element={<AdminCatalogsPage />} />
                 </Route>
 

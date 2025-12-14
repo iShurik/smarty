@@ -5,6 +5,7 @@ import { Card, Col, Nav, Row } from 'react-bootstrap';
 const navItems = [
   { to: '/admin', label: 'Обзор' },
   { to: '/admin/moderation', label: 'Модерация' },
+  { to: '/admin/memes', label: 'Мемы' },
   { to: '/admin/catalogs', label: 'Каталоги' },
 ];
 
