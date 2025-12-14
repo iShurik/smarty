@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\MemeClipController;
+use App\Http\Controllers\MemeClipModerationController;
 use App\Http\Controllers\MediaFileController;
 use App\Http\Controllers\Streamer\StreamerRulesController;
 use App\Http\Controllers\Streamer\StreamerProfileController;
@@ -32,4 +34,14 @@ Route::prefix('v1')->group(function (): void {
 
   Route::get('tts/voices', [TtsVoiceController::class, 'index']);
   Route::get('tags', [TagController::class, 'index']);
+
+  Route::get('meme-clips', [MemeClipController::class, 'index']);
+  Route::middleware('auth:sanctum')->group(function (): void {
+    Route::post('meme-clips', [MemeClipController::class, 'store']);
+
+    Route::prefix('moderation')->group(function (): void {
+      Route::post('meme-clips/{memeClip}/approve', [MemeClipModerationController::class, 'approve']);
+      Route::post('meme-clips/{memeClip}/reject', [MemeClipModerationController::class, 'reject']);
+    });
+  });
 });
