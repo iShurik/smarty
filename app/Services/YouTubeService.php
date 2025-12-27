@@ -93,7 +93,7 @@ class YouTubeService
       'title' => $item['snippet']['title'] ?? null,
       'channel_title' => $item['snippet']['channelTitle'] ?? null,
       'views' => isset($item['statistics']['viewCount']) ? (int) $item['statistics']['viewCount'] : null,
-      'duration_sec' => $duration ? CarbonInterval::make($duration)->totalSeconds : null,
+      'duration_sec' => $duration ? (int) CarbonInterval::make($duration)->totalSeconds : null,
       'region_blocked' => array_values($regionRestriction['blocked'] ?? []),
     ];
   }
