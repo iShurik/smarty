@@ -4,11 +4,16 @@ namespace Tests\Unit;
 
 use App\Services\YouTubeService;
 use Illuminate\Support\Facades\Http;
+use App\Models\YoutubeVideoCache;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class YouTubeServiceTest extends TestCase
 {
+  use RefreshDatabase;
+
   #[Test]
   public function it_parses_various_youtube_urls(): void
   {
@@ -37,7 +42,10 @@ class YouTubeServiceTest extends TestCase
         'items' => [
           [
             'id' => 'dQw4w9WgXcQ',
-            'snippet' => ['title' => 'Never Gonna Give You Up'],
+            'snippet' => [
+              'title' => 'Never Gonna Give You Up',
+              'channelTitle' => 'RickAstleyVEVO',
+            ],
             'contentDetails' => [
               'duration' => 'PT3M33S',
               'regionRestriction' => [
@@ -58,6 +66,7 @@ class YouTubeServiceTest extends TestCase
 
     $this->assertNotNull($data);
     $this->assertSame('Never Gonna Give You Up', $data['title']);
+    $this->assertSame('RickAstleyVEVO', $data['channel_title']);
     $this->assertSame(123456789, $data['views']);
     $this->assertSame(213, $duration);
     $this->assertSame(['DE', 'RU'], $data['region_blocked']);
@@ -87,5 +96,80 @@ class YouTubeServiceTest extends TestCase
     $this->expectException(\RuntimeException::class);
 
     $service->fetchMetadata('dQw4w9WgXcQ');
+  }
+  
+  #[Test]
+  public function it_returns_cached_video_when_fresh(): void
+  {
+    config([
+      'services.youtube.api_key' => 'test-key',
+      'services.youtube.cache_ttl_minutes' => 120,
+    ]);
+
+    $cached = YoutubeVideoCache::create([
+      'youtube_id' => 'dQw4w9WgXcQ',
+      'title' => 'Old title',
+      'channel_title' => 'Cached channel',
+      'views' => 42,
+      'duration_sec' => 200,
+      'region_blocked_json' => ['DE'],
+      'last_checked_at' => Carbon::now()->subMinutes(15),
+    ]);
+
+    Http::fake();
+
+    $service = new YouTubeService();
+
+    $result = $service->getOrUpdate('dQw4w9WgXcQ');
+
+    Http::assertNothingSent();
+    $this->assertSame($cached->id, $result?->id);
+  }
+
+  #[Test]
+  public function it_updates_cache_when_stale_or_missing(): void
+  {
+    config([
+      'services.youtube.api_key' => 'test-key',
+      'services.youtube.cache_ttl_minutes' => 30,
+      'services.youtube.base_url' => 'https://youtube.googleapis.com/youtube/v3',
+    ]);
+
+    YoutubeVideoCache::create([
+      'youtube_id' => 'dQw4w9WgXcQ',
+      'title' => 'Very old title',
+      'views' => 1,
+      'last_checked_at' => Carbon::now()->subHours(2),
+    ]);
+
+    Http::fake([
+      'https://youtube.googleapis.com/youtube/v3/videos*' => Http::response([
+        'items' => [
+          [
+            'id' => 'dQw4w9WgXcQ',
+            'snippet' => [
+              'title' => 'New title',
+              'channelTitle' => 'New channel',
+            ],
+            'contentDetails' => [
+              'duration' => 'PT4M10S',
+            ],
+            'statistics' => [
+              'viewCount' => '987',
+            ],
+          ],
+        ],
+      ]),
+    ]);
+
+    $service = new YouTubeService();
+
+    $result = $service->getOrUpdate('dQw4w9WgXcQ');
+
+    $this->assertSame('New title', $result?->title);
+    $this->assertSame('New channel', $result?->channel_title);
+    $this->assertSame(987, $result?->views);
+    $this->assertSame(250, $result?->duration_sec);
+    $this->assertNotNull($result?->last_checked_at);
   }
 }

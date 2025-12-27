@@ -38,6 +38,7 @@ return [
   'youtube' => [
     'api_key' => env('YOUTUBE_API_KEY'),
     'base_url' => env('YOUTUBE_API_BASE_URL', 'https://www.googleapis.com/youtube/v3'),
+    'cache_ttl_minutes' => env('YOUTUBE_CACHE_TTL_MINUTES', 60),
   ],
 
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\YoutubeVideoCache;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -72,7 +73,7 @@ class YouTubeService
       ->get('/videos', [
         'id' => $videoId,
         'part' => 'snippet,contentDetails,statistics',
-        'fields' => 'items(id,snippet/title,contentDetails/duration,contentDetails/regionRestriction,statistics/viewCount)',
+        'fields' => 'items(id,snippet/title,snippet/channelTitle,contentDetails/duration,contentDetails/regionRestriction,statistics/viewCount)',
         'key' => $this->apiKey,
       ]);
 
@@ -90,9 +91,39 @@ class YouTubeService
     return [
       'youtube_id' => $videoId,
       'title' => $item['snippet']['title'] ?? null,
+      'channel_title' => $item['snippet']['channelTitle'] ?? null,
       'views' => isset($item['statistics']['viewCount']) ? (int) $item['statistics']['viewCount'] : null,
       'duration_sec' => $duration ? CarbonInterval::make($duration)->totalSeconds : null,
       'region_blocked' => array_values($regionRestriction['blocked'] ?? []),
     ];
+  }
+  
+  public function getOrUpdate(string $videoId): ?YoutubeVideoCache
+  {
+    $cacheTtlMinutes = (int) config('services.youtube.cache_ttl_minutes', 60);
+
+    $cached = YoutubeVideoCache::where('youtube_id', $videoId)->first();
+
+    if ($cached && $cached->last_checked_at && $cached->last_checked_at->gt(now()->subMinutes($cacheTtlMinutes))) {
+      return $cached;
+    }
+
+    $metadata = $this->fetchMetadata($videoId);
+
+    if ($metadata === null) {
+      return $cached;
+    }
+
+    return YoutubeVideoCache::updateOrCreate(
+      ['youtube_id' => $videoId],
+      [
+        'title' => $metadata['title'] ?? null,
+        'channel_title' => $metadata['channel_title'] ?? null,
+        'views' => $metadata['views'] ?? null,
+        'duration_sec' => $metadata['duration_sec'] ?? null,
+        'region_blocked_json' => $metadata['region_blocked'] ?? [],
+        'last_checked_at' => now(),
+      ],
+    );
   }
 }
