@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\StreamerProfile;
 use App\Models\YoutubeVideoCache;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Http;
@@ -125,5 +126,83 @@ class YouTubeService
         'last_checked_at' => now(),
       ],
     );
+  }
+
+  public function validateForStreamer(StreamerProfile $streamer, string $videoId): array
+  {
+    $videoId = trim($videoId);
+
+    if ($videoId === '') {
+      return [
+        'allowed' => false,
+        'reject_reason' => 'invalid_id',
+        'country_warning' => false,
+        'video' => null,
+      ];
+    }
+
+    $isBanned = $streamer->bannedYoutubeVideos()
+      ->where('youtube_id', $videoId)
+      ->exists();
+
+    if ($isBanned) {
+      return [
+        'allowed' => false,
+        'reject_reason' => 'banned',
+        'country_warning' => false,
+        'video' => null,
+      ];
+    }
+
+    $video = $this->getOrUpdate($videoId);
+
+    if (! $video) {
+      return [
+        'allowed' => false,
+        'reject_reason' => 'not_found',
+        'country_warning' => false,
+        'video' => null,
+      ];
+    }
+
+    if (($video->views ?? 0) < 1000) {
+      return [
+        'allowed' => false,
+        'reject_reason' => 'low_views',
+        'country_warning' => false,
+        'video' => $video,
+      ];
+    }
+
+    $countryWarning = $this->isRegionBlocked($video, $streamer->country_code);
+
+    return [
+      'allowed' => true,
+      'reject_reason' => null,
+      'country_warning' => $countryWarning,
+      'video' => $video,
+    ];
+  }
+
+  private function isRegionBlocked(YoutubeVideoCache $video, ?string $countryCode): bool
+  {
+    $countryCode = strtoupper(trim((string) $countryCode));
+
+    if ($countryCode === '') {
+      return false;
+    }
+
+    $blocked = $video->region_blocked_json ?? [];
+
+    if (! is_array($blocked)) {
+      return false;
+    }
+
+    $blockedUpper = array_map(
+      static fn (string $code): string => strtoupper($code),
+      array_filter($blocked, static fn ($code): bool => is_string($code) && $code !== '')
+    );
+
+    return in_array($countryCode, $blockedUpper, true);
   }
 }
