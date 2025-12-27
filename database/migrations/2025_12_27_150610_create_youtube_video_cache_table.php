@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('youtube_videos_cache', function (Blueprint $table): void {
+        Schema::create('youtube_video_caches', function (Blueprint $table): void {
             $table->id();
             $table->string('youtube_id', 32)->unique();
             $table->string('title')->nullable();
@@ -23,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('youtube_videos_cache');
+        Schema::dropIfExists('youtube_video_caches');
     }
 };
