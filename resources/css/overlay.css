@@ -1,0 +1,194 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Russo+One&display=swap');
+
+:root {
+  --overlay-card: rgba(14, 18, 28, 0.78);
+  --overlay-card-strong: rgba(14, 18, 28, 0.92);
+  --overlay-accent: #ffb457;
+  --overlay-accent-soft: rgba(255, 180, 87, 0.2);
+  --overlay-glow: rgba(255, 180, 87, 0.45);
+  --overlay-text: #f6f4ff;
+  --overlay-muted: rgba(246, 244, 255, 0.7);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: transparent;
+  color: var(--overlay-text);
+  font-family: 'Manrope', system-ui, sans-serif;
+}
+
+#overlay-root {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.overlay-shell {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 28px 48px;
+  gap: 26px;
+}
+
+.overlay-card {
+  width: min(680px, 92vw);
+  background: linear-gradient(135deg, var(--overlay-card), rgba(35, 42, 62, 0.9));
+  border-radius: 26px;
+  padding: 22px 28px 24px;
+  border: 2px solid rgba(255, 180, 87, 0.35);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35), 0 0 30px var(--overlay-glow);
+  animation: overlayPop 0.6s ease;
+  backdrop-filter: blur(18px);
+}
+
+.overlay-title {
+  font-family: 'Russo One', 'Manrope', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--overlay-muted);
+  margin-bottom: 12px;
+}
+
+.donation-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 22px;
+}
+
+.donor-name {
+  font-weight: 700;
+}
+
+.donation-amount {
+  font-weight: 700;
+  color: var(--overlay-accent);
+  text-shadow: 0 0 12px rgba(255, 180, 87, 0.55);
+}
+
+.donation-message {
+  margin-top: 14px;
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--overlay-text);
+}
+
+.phase-pill {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--overlay-accent-soft);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--overlay-accent);
+}
+
+.media-stage {
+  width: min(980px, 96vw);
+  display: flex;
+  justify-content: center;
+}
+
+.media-frame {
+  width: 100%;
+  max-width: 980px;
+  aspect-ratio: 16 / 9;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.media-frame iframe,
+.media-frame video {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.media-hidden {
+  opacity: 0;
+  transform: scale(0.98);
+  pointer-events: none;
+}
+
+.media-visible {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.connection-badge {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--overlay-card-strong);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--overlay-muted);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.connection-badge.is-live {
+  color: var(--overlay-accent);
+  border-color: rgba(255, 180, 87, 0.5);
+  box-shadow: 0 0 14px rgba(255, 180, 87, 0.4);
+}
+
+.overlay-empty {
+  width: min(520px, 88vw);
+  padding: 18px 22px;
+  border-radius: 20px;
+  background: var(--overlay-card-strong);
+  text-align: center;
+  color: var(--overlay-muted);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+@keyframes overlayPop {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 680px) {
+  .overlay-shell {
+    padding: 24px 18px 32px;
+  }
+
+  .overlay-card {
+    padding: 18px 20px 20px;
+  }
+
+  .donation-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

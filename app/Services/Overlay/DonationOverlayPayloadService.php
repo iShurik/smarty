@@ -30,10 +30,13 @@ class DonationOverlayPayloadService
 
     if ($donation->youtubeCache) {
       $payload['youtube_url'] = 'https://www.youtube.com/watch?v='.$donation->youtubeCache->youtube_id;
+      $payload['youtube_id'] = $donation->youtubeCache->youtube_id;
+      $payload['youtube_duration_sec'] = $donation->youtubeCache->duration_sec;
     }
 
     if ($donation->memeClip && $donation->memeClip->file) {
       $payload['meme_clip_url'] = $this->mediaUrl($donation->memeClip->file);
+      $payload['meme_duration_sec'] = $donation->memeClip->duration_sec;
     }
 
     if ($donation->goal) {

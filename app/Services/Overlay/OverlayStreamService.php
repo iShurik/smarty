@@ -49,7 +49,7 @@ class OverlayStreamService
           break;
         }
 
-    $payload = $this->claimNextDonationPayload($profile->id);
+        $payload = $this->claimNextDonationPayload($profile->id);
 
         if ($payload) {
           $this->sendEvent('donation', $payload);
@@ -81,7 +81,10 @@ class OverlayStreamService
           $query->where('streamer_id', $streamerId);
         })
         ->whereDoesntHave('donation.events', function ($query) {
-          $query->where('type', DonationEvent::TYPE_PLAYED);
+          $query->whereIn('type', [
+            DonationEvent::TYPE_PLAYED,
+            DonationEvent::TYPE_DISPATCHED,
+          ]);
         })
         ->orderBy('id')
         ->lockForUpdate()
@@ -103,12 +106,51 @@ class OverlayStreamService
 
       DonationEvent::create([
         'donation_id' => $event->donation_id,
-        'type' => DonationEvent::TYPE_PLAYED,
+        'type' => DonationEvent::TYPE_DISPATCHED,
         'payload_json' => null,
         'created_at' => now(),
       ]);
 
       return $payload;
+    });
+  }
+
+  public function acknowledgeDonation(StreamerProfile $profile, int $donationId): void
+  {
+    DB::transaction(function () use ($profile, $donationId): void {
+      $donation = Donation::query()
+        ->where('id', $donationId)
+        ->where('streamer_id', $profile->id)
+        ->lockForUpdate()
+        ->first();
+
+      if (! $donation) {
+        return;
+      }
+
+      if ($donation->status === Donation::STATUS_PLAYED) {
+        return;
+      }
+
+      if ($donation->status !== Donation::STATUS_PAID) {
+        return;
+      }
+
+      $donation->status = Donation::STATUS_PLAYED;
+      $donation->save();
+
+      $hasPlayedEvent = $donation->events()
+        ->where('type', DonationEvent::TYPE_PLAYED)
+        ->exists();
+
+      if (! $hasPlayedEvent) {
+        DonationEvent::create([
+          'donation_id' => $donation->id,
+          'type' => DonationEvent::TYPE_PLAYED,
+          'payload_json' => null,
+          'created_at' => now(),
+        ]);
+      }
     });
   }
 

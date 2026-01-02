@@ -14,6 +14,7 @@ class DonationEvent extends Model
   public const TYPE_PAID = 'paid';
   public const TYPE_TTS_READY = 'tts_ready';
   public const TYPE_BROADCASTED = 'broadcasted';
+  public const TYPE_DISPATCHED = 'dispatched';
   public const TYPE_PLAYED = 'played';
   public const TYPE_REFUNDED = 'refunded';
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\MemeClipController;
 use App\Http\Controllers\MemeClipModerationController;
 use App\Http\Controllers\MediaFileController;
 use App\Http\Controllers\MockPaymentController;
+use App\Http\Controllers\OverlayController;
 use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\PublicStreamerController;
 use App\Http\Controllers\Streamer\StreamerGoalController;
@@ -45,6 +46,7 @@ Route::prefix('v1')->group(function (): void {
 
   Route::get('meme-clips', [MemeClipController::class, 'index']);
   Route::post('donations', [DonationController::class, 'store']);
+  Route::post('overlay/streamer/{slug}/ack', [OverlayController::class, 'acknowledge']);
   Route::get('payments/mock/{payment}', [MockPaymentController::class, 'show'])
     ->name('payments.mock.checkout');
   Route::post('payments/mock/webhook', [PaymentWebhookController::class, 'handleMock']);
