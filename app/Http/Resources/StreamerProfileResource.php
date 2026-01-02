@@ -22,6 +22,7 @@ class StreamerProfileResource extends JsonResource
             'display_name' => $this->display_name,
             'country_code' => $this->country_code,
             'slug' => $this->donation_page_slug,
+            'overlay_token' => $this->overlay_token,
             'min_amount' => $this->min_donation_amount,
             'updated_at' => $this->updated_at,
         ];

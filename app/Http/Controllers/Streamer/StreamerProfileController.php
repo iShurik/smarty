@@ -43,12 +43,20 @@ class StreamerProfileController extends Controller
             abort(403, 'Доступно только для стримеров');
         }
 
-        return $user->streamerProfile()->firstOrCreate([], [
+        $profile = $user->streamerProfile()->firstOrCreate([], [
             'display_name' => $user->name ?? 'Streamer',
             'country_code' => 'US',
             'donation_page_slug' => $this->generateUniqueSlug($user->name ?? 'streamer'),
+            'overlay_token' => $this->generateOverlayToken(),
             'min_donation_amount' => 0,
         ]);
+
+        if (! $profile->overlay_token) {
+            $profile->overlay_token = $this->generateOverlayToken();
+            $profile->save();
+        }
+
+        return $profile;
     }
 
     private function generateUniqueSlug(string $base): string
@@ -63,5 +71,10 @@ class StreamerProfileController extends Controller
         }
 
         return $slug;
+    }
+
+    private function generateOverlayToken(): string
+    {
+        return Str::random(40);
     }
 }

@@ -17,6 +17,7 @@ class StreamerProfile extends Model
     'country_code',
     'about',
     'donation_page_slug',
+    'overlay_token',
     'min_donation_amount',
   ];
 
@@ -24,6 +25,7 @@ class StreamerProfile extends Model
   {
     return [
       'min_donation_amount' => 'decimal:2',
+      'overlay_token' => 'encrypted',
     ];
   }
 
