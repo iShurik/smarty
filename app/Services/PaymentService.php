@@ -124,8 +124,6 @@ class PaymentService
   private function shouldGenerateTts(Donation $donation): bool
   {
     return $donation->voice_id !== null
-      && $donation->message_text !== null
-      && $donation->message_text !== ''
       && $donation->tts_audio_file_id === null;
   }
 }
