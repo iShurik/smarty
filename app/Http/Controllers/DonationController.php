@@ -10,6 +10,7 @@ use App\Models\MemeClip;
 use App\Models\Payment;
 use App\Models\StreamerProfile;
 use App\Models\TtsVoice;
+use App\Services\DonationAntiFraudService;
 use App\Services\PaymentService;
 use App\Services\StreamerRulesService;
 use App\Services\YouTubeService;
@@ -21,6 +22,7 @@ class DonationController extends Controller
 {
   public function store(
     StoreDonationRequest $request,
+    DonationAntiFraudService $antiFraudService,
     StreamerRulesService $rulesService,
     PaymentService $paymentService,
     YouTubeService $youTubeService
@@ -37,6 +39,19 @@ class DonationController extends Controller
     if ($amount < $minAmount) {
       throw ValidationException::withMessages([
         'amount' => "Минимальная сумма доната: {$minAmount}.",
+      ]);
+    }
+
+    $antiFraudCheck = $antiFraudService->validateDonationContent(
+      $request,
+      $streamer->id,
+      $data['message_text'] ?? null,
+      $data['donor_name'] ?? null
+    );
+
+    if (! $antiFraudCheck['allowed']) {
+      throw ValidationException::withMessages([
+        $antiFraudCheck['field'] => $this->antiFraudRejectMessage($antiFraudCheck['reject_reason']),
       ]);
     }
 
@@ -181,6 +196,17 @@ class DonationController extends Controller
       'low_views' => 'Видео не набрало 1000 просмотров.',
       'invalid_id' => 'Некорректный идентификатор видео.',
       default => 'Видео не прошло проверку.',
+    };
+  }
+
+  private function antiFraudRejectMessage(?string $reason): string
+  {
+    return match ($reason) {
+      'profanity' => 'Сообщение содержит недопустимую лексику.',
+      'spam_links' => 'Слишком много ссылок в сообщении.',
+      'spam_chars' => 'Сообщение похоже на спам.',
+      'duplicate_message' => 'Похожее сообщение недавно уже отправлялось.',
+      default => 'Сообщение не прошло антифрод-проверку.',
     };
   }
 

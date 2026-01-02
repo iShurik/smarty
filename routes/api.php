@@ -55,7 +55,8 @@ Route::prefix('v1')->group(function (): void {
   Route::get('tags', [TagController::class, 'index']);
 
   Route::get('meme-clips', [MemeClipController::class, 'index']);
-  Route::post('donations', [DonationController::class, 'store']);
+  Route::post('donations', [DonationController::class, 'store'])
+    ->middleware('throttle:donations');
   Route::post('overlay/streamer/{slug}/ack', [OverlayController::class, 'acknowledge']);
   Route::get('payments/mock/{payment}', [MockPaymentController::class, 'show'])
     ->name('payments.mock.checkout');
