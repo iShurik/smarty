@@ -14,6 +14,7 @@ use App\Http\Controllers\PublicStreamerController;
 use App\Http\Controllers\Streamer\StreamerGoalController;
 use App\Http\Controllers\Streamer\StreamerDonationController;
 use App\Http\Controllers\Streamer\StreamerRulesController;
+use App\Http\Controllers\Streamer\StreamerStatsController;
 use App\Http\Controllers\Streamer\StreamerProfileController;
 use App\Http\Controllers\TtsVoiceController;
 use App\Http\Controllers\TagController;
@@ -36,6 +37,7 @@ Route::prefix('v1')->group(function (): void {
     Route::apiResource('goals', StreamerGoalController::class)->except(['create', 'edit']);
     Route::get('donations', [StreamerDonationController::class, 'index']);
     Route::post('donations/{donation}/reject', [StreamerDonationController::class, 'reject']);
+    Route::get('stats', [StreamerStatsController::class, 'overview']);
     Route::get('rules', [StreamerRulesController::class, 'show']);
     Route::put('rules/allowed-voices', [StreamerRulesController::class, 'updateAllowedVoices']);
     Route::put('rules/banned-meme-tags', [StreamerRulesController::class, 'updateBannedMemeTags']);
