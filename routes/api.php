@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DonationController;
+use App\Http\Controllers\Donor\DonorDonationController;
+use App\Http\Controllers\Donor\DonorStreamerController;
 use App\Http\Controllers\MemeClipController;
 use App\Http\Controllers\MemeClipModerationController;
 use App\Http\Controllers\MediaFileController;
@@ -38,6 +40,11 @@ Route::prefix('v1')->group(function (): void {
     Route::put('rules/allowed-voices', [StreamerRulesController::class, 'updateAllowedVoices']);
     Route::put('rules/banned-meme-tags', [StreamerRulesController::class, 'updateBannedMemeTags']);
     Route::put('rules/banned-youtube-videos', [StreamerRulesController::class, 'updateBannedYoutubeVideos']);    
+  });
+
+  Route::middleware('auth:sanctum')->prefix('donor')->group(function (): void {
+    Route::get('donations', [DonorDonationController::class, 'index']);
+    Route::get('streamers', [DonorStreamerController::class, 'index']);
   });
 
   Route::middleware('auth:sanctum')->post('media-files', [MediaFileController::class, 'store']);
