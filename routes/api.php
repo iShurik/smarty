@@ -32,6 +32,7 @@ Route::prefix('v1')->group(function (): void {
     Route::get('profile', [StreamerProfileController::class, 'show']);
     Route::put('profile', [StreamerProfileController::class, 'update']);
     Route::apiResource('goals', StreamerGoalController::class)->except(['create', 'edit']);
+    Route::get('donations', [StreamerDonationController::class, 'index']);
     Route::post('donations/{donation}/reject', [StreamerDonationController::class, 'reject']);
     Route::get('rules', [StreamerRulesController::class, 'show']);
     Route::put('rules/allowed-voices', [StreamerRulesController::class, 'updateAllowedVoices']);

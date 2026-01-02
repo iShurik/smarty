@@ -22,6 +22,7 @@ import StreamerGoalsPage from '../pages/StreamerGoalsPage';
 import StreamerMediaPage from '../pages/StreamerMediaPage';
 import StreamerRulesPage from '../pages/StreamerRulesPage';
 import StreamerModerationPage from '../pages/StreamerModerationPage';
+import StreamerDonationsPage from '../pages/StreamerDonationsPage';
 import UnauthorizedPage from '../pages/UnauthorizedPage';
 import AdminMemeModerationPage from '../pages/AdminMemeModerationPage';
 import StreamerPublicPage from '../pages/StreamerPublicPage';
@@ -45,6 +46,7 @@ export default function AppRoutes() {
                     }
                 >
                     <Route index element={<StreamerDashboard />} />
+                    <Route path="donations" element={<StreamerDonationsPage />} />
                     <Route path="profile" element={<StreamerProfilePage />} />
                     <Route path="goals" element={<StreamerGoalsPage />} />
                     <Route path="media" element={<StreamerMediaPage />} />

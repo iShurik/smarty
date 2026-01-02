@@ -3,15 +3,62 @@
 namespace App\Http\Controllers\Streamer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Streamer\StreamerDonationIndexRequest;
 use App\Http\Requests\Streamer\RejectDonationRequest;
 use App\Models\Donation;
 use App\Models\StreamerProfile;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class StreamerDonationController extends Controller
 {
+  public function index(StreamerDonationIndexRequest $request): JsonResponse
+  {
+    $profile = $this->resolveProfile($request->user());
+    $filters = $request->validated();
+
+    $query = $profile->donations()
+      ->with(['donor', 'youtubeCache', 'voice', 'memeClip'])
+      ->orderByDesc('created_at');
+
+    if (! empty($filters['status'])) {
+      $query->where('status', $filters['status']);
+    }
+
+    if (! empty($filters['from'])) {
+      $fromDate = Carbon::parse($filters['from'])->startOfDay();
+      $query->where('created_at', '>=', $fromDate);
+    }
+
+    if (! empty($filters['to'])) {
+      $toDate = Carbon::parse($filters['to'])->endOfDay();
+      $query->where('created_at', '<=', $toDate);
+    }
+
+    if (! empty($filters['sort_by'])) {
+      $sortBy = $filters['sort_by'];
+      $sortDir = $filters['sort_dir'] ?? 'desc';
+      $query->reorder()->orderBy($sortBy, $sortDir);
+    }
+
+    $perPage = isset($filters['per_page']) ? (int) $filters['per_page'] : 15;
+    $perPage = max(1, min($perPage, 100));
+
+    $donations = $query->paginate($perPage);
+
+    return response()->json([
+      'data' => $donations->getCollection()->map(fn (Donation $donation) => $this->transform($donation))->values(),
+      'meta' => [
+        'current_page' => $donations->currentPage(),
+        'last_page' => $donations->lastPage(),
+        'per_page' => $donations->perPage(),
+        'total' => $donations->total(),
+      ],
+    ]);
+  }
+
   public function reject(RejectDonationRequest $request, int $donation): JsonResponse
   {
     $profile = $this->resolveProfile($request->user());
@@ -90,11 +137,16 @@ class StreamerDonationController extends Controller
     return [
       'id' => $donation->id,
       'streamer_id' => $donation->streamer_id,
+      'donor_name' => $donation->donor?->name ?? $donation->donor_name ?? 'Гость',
       'amount' => $donation->amount,
       'currency' => $donation->currency,
       'message_text' => $donation->message_text,
+      'has_tts' => (bool) $donation->voice_id,
+      'youtube_id' => $donation->youtubeCache?->youtube_id,
+      'meme_clip_id' => $donation->meme_clip_id,
       'status' => $donation->status,
       'reject_reason' => $donation->reject_reason,
+      'country_warning' => (bool) $donation->country_warning,
       'created_at' => $donation->created_at,
       'updated_at' => $donation->updated_at,
     ];

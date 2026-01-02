@@ -4,6 +4,7 @@ import { Card, Col, Nav, Row } from 'react-bootstrap';
 
 const navItems = [
   { to: '/streamer', label: 'Дашборд' },
+  { to: '/streamer/donations', label: 'Донаты' },
   { to: '/streamer/profile', label: 'Профиль' },
   { to: '/streamer/goals', label: 'Цели' },
   { to: '/streamer/media', label: 'Медиа' },
