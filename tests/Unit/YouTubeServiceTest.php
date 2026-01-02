@@ -2,11 +2,13 @@
 
 namespace Tests\Unit;
 
+use App\Models\StreamerBannedYoutubeVideo;
+use App\Models\StreamerProfile;
 use App\Services\YouTubeService;
-use Illuminate\Support\Facades\Http;
 use App\Models\YoutubeVideoCache;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Http;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -171,5 +173,98 @@ class YouTubeServiceTest extends TestCase
     $this->assertSame(987, $result?->views);
     $this->assertSame(250, $result?->duration_sec);
     $this->assertNotNull($result?->last_checked_at);
+  }
+
+  #[Test]
+  public function it_rejects_banned_video_for_streamer(): void
+  {
+    $streamer = StreamerProfile::create([
+      'user_id' => \App\Models\User::factory()->create()->id,
+      'display_name' => 'Streamer',
+      'country_code' => 'UA',
+      'donation_page_slug' => 'streamer',
+      'min_donation_amount' => 0,
+    ]);
+
+    StreamerBannedYoutubeVideo::create([
+      'streamer_id' => $streamer->id,
+      'youtube_id' => 'dQw4w9WgXcQ',
+      'reason' => 'ban',
+    ]);
+
+    $service = new YouTubeService();
+
+    $result = $service->validateForStreamer($streamer, 'dQw4w9WgXcQ');
+
+    $this->assertFalse($result['allowed']);
+    $this->assertSame('banned', $result['reject_reason']);
+    $this->assertFalse($result['country_warning']);
+    $this->assertNull($result['video']);
+  }
+
+  #[Test]
+  public function it_rejects_video_with_low_views(): void
+  {
+    config(['services.youtube.cache_ttl_minutes' => 120]);
+
+    $streamer = StreamerProfile::create([
+      'user_id' => \App\Models\User::factory()->create()->id,
+      'display_name' => 'Streamer',
+      'country_code' => 'UA',
+      'donation_page_slug' => 'streamer-low',
+      'min_donation_amount' => 0,
+    ]);
+
+    YoutubeVideoCache::create([
+      'youtube_id' => 'dQw4w9WgXcQ',
+      'title' => 'Test',
+      'channel_title' => 'Channel',
+      'views' => 999,
+      'duration_sec' => 10,
+      'region_blocked_json' => [],
+      'last_checked_at' => Carbon::now(),
+    ]);
+
+    $service = new YouTubeService();
+
+    $result = $service->validateForStreamer($streamer, 'dQw4w9WgXcQ');
+
+    $this->assertFalse($result['allowed']);
+    $this->assertSame('low_views', $result['reject_reason']);
+    $this->assertFalse($result['country_warning']);
+    $this->assertInstanceOf(YoutubeVideoCache::class, $result['video']);
+  }
+
+  #[Test]
+  public function it_flags_country_warning_when_region_blocked(): void
+  {
+    config(['services.youtube.cache_ttl_minutes' => 120]);
+
+    $streamer = StreamerProfile::create([
+      'user_id' => \App\Models\User::factory()->create()->id,
+      'display_name' => 'Streamer',
+      'country_code' => 'UA',
+      'donation_page_slug' => 'streamer-ua',
+      'min_donation_amount' => 0,
+    ]);
+
+    YoutubeVideoCache::create([
+      'youtube_id' => 'dQw4w9WgXcQ',
+      'title' => 'Test',
+      'channel_title' => 'Channel',
+      'views' => 1000,
+      'duration_sec' => 10,
+      'region_blocked_json' => ['UA', 'DE'],
+      'last_checked_at' => Carbon::now(),
+    ]);
+
+    $service = new YouTubeService();
+
+    $result = $service->validateForStreamer($streamer, 'dQw4w9WgXcQ');
+
+    $this->assertTrue($result['allowed']);
+    $this->assertNull($result['reject_reason']);
+    $this->assertTrue($result['country_warning']);
+    $this->assertInstanceOf(YoutubeVideoCache::class, $result['video']);
   }
 }
