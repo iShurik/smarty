@@ -24,6 +24,7 @@ import StreamerRulesPage from '../pages/StreamerRulesPage';
 import StreamerModerationPage from '../pages/StreamerModerationPage';
 import UnauthorizedPage from '../pages/UnauthorizedPage';
 import AdminMemeModerationPage from '../pages/AdminMemeModerationPage';
+import StreamerPublicPage from '../pages/StreamerPublicPage';
 
 export default function AppRoutes() {
     return (
@@ -33,6 +34,7 @@ export default function AppRoutes() {
                 <Route path="login" element={<LoginPage />} />
                 <Route path="unauthorized" element={<UnauthorizedPage />} />
                 <Route path="memes" element={<MemeGalleryPage />} />
+                <Route path="s/:slug" element={<StreamerPublicPage />} />
 
                 <Route
                     path="streamer/*"

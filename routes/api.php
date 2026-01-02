@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\MemeClipController;
 use App\Http\Controllers\MemeClipModerationController;
 use App\Http\Controllers\MediaFileController;
+use App\Http\Controllers\PublicStreamerController;
 use App\Http\Controllers\Streamer\StreamerGoalController;
 use App\Http\Controllers\Streamer\StreamerRulesController;
 use App\Http\Controllers\Streamer\StreamerProfileController;
@@ -38,6 +39,7 @@ Route::prefix('v1')->group(function (): void {
   Route::get('tags', [TagController::class, 'index']);
 
   Route::get('meme-clips', [MemeClipController::class, 'index']);
+  Route::get('public/streamers/{slug}', [PublicStreamerController::class, 'show']);
   Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('meme-clips', [MemeClipController::class, 'store']);
 
