@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\TtsGenerateJob;
 use App\Models\Donation;
 use App\Models\DonationEvent;
 use App\Models\Payment;
@@ -73,6 +74,10 @@ class PaymentService
         'payload_json' => null,
         'created_at' => now(),
       ]);
+
+      if ($this->shouldGenerateTts($donation)) {
+        TtsGenerateJob::dispatch($donation->id)->afterCommit();
+      }
     });
   }
 
@@ -114,5 +119,13 @@ class PaymentService
     }
 
     return route('payments.mock.checkout', ['payment' => $payment->id]);
+  }
+
+  private function shouldGenerateTts(Donation $donation): bool
+  {
+    return $donation->voice_id !== null
+      && $donation->message_text !== null
+      && $donation->message_text !== ''
+      && $donation->tts_audio_file_id === null;
   }
 }
