@@ -5,6 +5,8 @@ use App\Http\Controllers\DonationController;
 use App\Http\Controllers\MemeClipController;
 use App\Http\Controllers\MemeClipModerationController;
 use App\Http\Controllers\MediaFileController;
+use App\Http\Controllers\MockPaymentController;
+use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\PublicStreamerController;
 use App\Http\Controllers\Streamer\StreamerGoalController;
 use App\Http\Controllers\Streamer\StreamerRulesController;
@@ -41,6 +43,9 @@ Route::prefix('v1')->group(function (): void {
 
   Route::get('meme-clips', [MemeClipController::class, 'index']);
   Route::post('donations', [DonationController::class, 'store']);
+  Route::get('payments/mock/{payment}', [MockPaymentController::class, 'show'])
+    ->name('payments.mock.checkout');
+  Route::post('payments/mock/webhook', [PaymentWebhookController::class, 'handleMock']);
   Route::get('public/streamers/{slug}', [PublicStreamerController::class, 'show']);
   Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('meme-clips', [MemeClipController::class, 'store']);

@@ -7,18 +7,22 @@ use App\Models\Donation;
 use App\Models\DonationEvent;
 use App\Models\Goal;
 use App\Models\MemeClip;
+use App\Models\Payment;
 use App\Models\StreamerProfile;
 use App\Models\TtsVoice;
+use App\Services\PaymentService;
 use App\Services\StreamerRulesService;
 use App\Services\YouTubeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class DonationController extends Controller
 {
   public function store(
     StoreDonationRequest $request,
     StreamerRulesService $rulesService,
+    PaymentService $paymentService,
     YouTubeService $youTubeService
   ): JsonResponse {
     $data = $request->validated();
@@ -115,8 +119,20 @@ class DonationController extends Controller
       'created_at' => now(),
     ]);
 
+    try {
+      $paymentPayload = $paymentService->createDonationPayment($donation);
+    } catch (RuntimeException) {
+      throw ValidationException::withMessages([
+        'payment_provider' => 'Платёжный провайдер недоступен.',
+      ]);
+    }
+
+    $payment = $paymentPayload['payment'];
+    $payment->loadMissing('provider');
+
     return response()->json([
       'data' => $this->transform($donation),
+      'payment' => $this->transformPayment($payment, $paymentPayload['redirect_url']),
     ], 201);
   }
 
@@ -181,6 +197,18 @@ class DonationController extends Controller
       'status' => $donation->status,
       'country_warning' => $donation->country_warning,
       'created_at' => $donation->created_at,
+    ];
+  }
+
+  private function transformPayment(Payment $payment, string $redirectUrl): array
+  {
+    return [
+      'id' => $payment->id,
+      'provider_code' => $payment->provider?->code,
+      'status' => $payment->status,
+      'amount' => $payment->amount,
+      'currency' => $payment->currency,
+      'redirect_url' => $redirectUrl,
     ];
   }
 }

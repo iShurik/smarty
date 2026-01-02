@@ -81,4 +81,9 @@ class Donation extends Model
   {
     return $this->hasMany(DonationEvent::class, 'donation_id');
   }
+
+  public function payments(): HasMany
+  {
+    return $this->hasMany(Payment::class, 'donation_id');
+  }
 }

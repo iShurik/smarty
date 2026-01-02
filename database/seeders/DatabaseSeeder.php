@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
     $this->call([
       TagSeeder::class,
       TtsVoiceSeeder::class,
+      PaymentProviderSeeder::class,
     ]);
   }
 }
