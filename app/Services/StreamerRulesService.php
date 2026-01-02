@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\MemeClip;
 use App\Models\StreamerProfile;
+use App\Models\TtsVoice;
 use Illuminate\Support\Collection;
 
 class StreamerRulesService
@@ -33,6 +35,48 @@ class StreamerRulesService
         'youtube_id' => $youtubeId,
       ]);
     }
+  }
+
+  public function validateDonationRules(StreamerProfile $streamer, ?TtsVoice $voice, ?MemeClip $memeClip): array
+  {
+    if ($voice) {
+      $hasVoiceRules = $streamer->allowedVoices()->exists();
+
+      if ($hasVoiceRules) {
+        $allowed = $streamer->allowedVoices()->whereKey($voice->id)->exists();
+
+        if (! $allowed) {
+          return [
+            'allowed' => false,
+            'reject_reason' => 'voice_not_allowed',
+            'field' => 'voice_id',
+          ];
+        }
+      }
+    }
+
+    if ($memeClip) {
+      $memeClip->loadMissing('tags');
+      $bannedTagIds = $streamer->bannedMemeTags()->pluck('tags.id')->all();
+
+      if (! empty($bannedTagIds)) {
+        $hasBannedTag = $memeClip->tags->pluck('id')->intersect($bannedTagIds)->isNotEmpty();
+
+        if ($hasBannedTag) {
+          return [
+            'allowed' => false,
+            'reject_reason' => 'banned_meme_tag',
+            'field' => 'meme_clip_id',
+          ];
+        }
+      }
+    }
+
+    return [
+      'allowed' => true,
+      'reject_reason' => null,
+      'field' => null,
+    ];
   }
 
   private function normalizeYoutubeIds(array $youtubeIds): array

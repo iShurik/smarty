@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\DonationController;
 use App\Http\Controllers\MemeClipController;
 use App\Http\Controllers\MemeClipModerationController;
 use App\Http\Controllers\MediaFileController;
@@ -39,6 +40,7 @@ Route::prefix('v1')->group(function (): void {
   Route::get('tags', [TagController::class, 'index']);
 
   Route::get('meme-clips', [MemeClipController::class, 'index']);
+  Route::post('donations', [DonationController::class, 'store']);
   Route::get('public/streamers/{slug}', [PublicStreamerController::class, 'show']);
   Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('meme-clips', [MemeClipController::class, 'store']);
