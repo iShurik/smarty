@@ -22,6 +22,8 @@ class PublicStreamerController extends Controller
         'country_code' => $profile->country_code,
         'slug' => $profile->donation_page_slug,
         'min_amount' => $profile->min_donation_amount,
+        'allowed_voice_ids' => $profile->allowedVoices()->pluck('tts_voices.id')->values(),
+        'banned_meme_tag_ids' => $profile->bannedMemeTags()->pluck('tags.id')->values(),
         'goals' => $this->activeGoals($profile),
       ],
     ]);

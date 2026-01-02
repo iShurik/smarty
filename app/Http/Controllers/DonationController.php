@@ -99,7 +99,7 @@ class DonationController extends Controller
     $donation = Donation::create([
       'streamer_id' => $streamer->id,
       'donor_user_id' => $request->user()?->id,
-      'donor_name' => null,
+      'donor_name' => $data['donor_name'] ?? null,
       'amount' => $amount,
       'currency' => $goal?->currency ?? 'USD',
       'message_text' => $data['message_text'] ?? null,

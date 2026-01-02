@@ -17,6 +17,7 @@ class StoreDonationRequest extends FormRequest
   {
     return [
       'streamer_slug' => ['required', 'string', 'max:64'],
+      'donor_name' => ['nullable', 'string', 'max:64'],
       'amount' => ['required', 'numeric', 'min:0.01'],
       'message_text' => ['nullable', 'string', 'max:2000'],
       'voice_id' => [
