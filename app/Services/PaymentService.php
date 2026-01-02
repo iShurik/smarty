@@ -9,6 +9,7 @@ use App\Models\DonationEvent;
 use App\Models\Payment;
 use App\Models\PaymentProvider;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -27,6 +28,16 @@ class PaymentService
       'status' => Payment::STATUS_INITIATED,
       'fee_amount' => 0,
       'meta_json' => null,
+    ]);
+
+    Log::channel('payments')->info('Donation payment initiated.', [
+      'payment_id' => $payment->id,
+      'donation_id' => $donation->id,
+      'provider_code' => $provider->code,
+      'provider_payment_id' => $payment->provider_payment_id,
+      'amount' => (float) $payment->amount,
+      'currency' => $payment->currency,
+      'status' => $payment->status,
     ]);
 
     return [
@@ -72,8 +83,25 @@ class PaymentService
       DonationEvent::create([
         'donation_id' => $donation->id,
         'type' => DonationEvent::TYPE_PAID,
-        'payload_json' => null,
+        'payload_json' => [
+          'payment_id' => $payment->id,
+          'provider_code' => $payment->provider?->code,
+          'provider_payment_id' => $payment->provider_payment_id,
+          'amount' => (float) $payment->amount,
+          'currency' => $payment->currency,
+          'fee_amount' => (float) $payment->fee_amount,
+        ],
         'created_at' => now(),
+      ]);
+
+      Log::channel('payments')->info('Donation payment succeeded.', [
+        'payment_id' => $payment->id,
+        'donation_id' => $donation->id,
+        'provider_code' => $payment->provider?->code,
+        'provider_payment_id' => $payment->provider_payment_id,
+        'amount' => (float) $payment->amount,
+        'currency' => $payment->currency,
+        'status' => $payment->status,
       ]);
 
       if ($this->shouldGenerateTts($donation)) {
@@ -97,6 +125,16 @@ class PaymentService
     }
 
     $payment->save();
+
+    Log::channel('payments')->warning('Donation payment failed.', [
+      'payment_id' => $payment->id,
+      'donation_id' => $payment->donation_id,
+      'provider_code' => $payment->provider?->code,
+      'provider_payment_id' => $payment->provider_payment_id,
+      'amount' => (float) $payment->amount,
+      'currency' => $payment->currency,
+      'status' => $payment->status,
+    ]);
   }
 
   private function resolveProvider(): PaymentProvider

@@ -132,7 +132,21 @@ class DonationController extends Controller
     DonationEvent::create([
       'donation_id' => $donation->id,
       'type' => DonationEvent::TYPE_CREATED,
-      'payload_json' => null,
+      'payload_json' => [
+        'streamer_id' => $streamer->id,
+        'donor_user_id' => $donor?->id,
+        'donor_name' => $data['donor_name'] ?? null,
+        'amount' => $amount,
+        'currency' => $goal?->currency ?? 'USD',
+        'message_length' => isset($data['message_text']) ? mb_strlen((string) $data['message_text']) : 0,
+        'voice_id' => $voice?->id,
+        'youtube_cache_id' => $youtubeCacheId,
+        'meme_clip_id' => $memeClip?->id,
+        'goal_id' => $goal?->id,
+        'country_warning' => $countryWarning,
+        'ip' => $request->ip(),
+        'user_agent' => $request->userAgent(),
+      ],
       'created_at' => now(),
     ]);
 

@@ -25,6 +25,12 @@ class PaymentWebhookController extends Controller
       ], Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
+    Log::channel('payments')->info('MockPay webhook received.', [
+      'provider_payment_id' => $providerPaymentId,
+      'status' => $status,
+      'ip' => $request->ip(),
+    ]);
+
     $payment = Payment::query()
       ->where('provider_payment_id', $providerPaymentId)
       ->first();
@@ -65,7 +71,7 @@ class PaymentWebhookController extends Controller
     $expected = hash_hmac('sha256', $request->getContent(), $secret);
 
     if (! hash_equals($expected, $signature)) {
-      Log::warning('MockPay webhook signature mismatch.');
+      Log::channel('payments')->warning('MockPay webhook signature mismatch.');
       abort(Response::HTTP_UNAUTHORIZED, 'Invalid signature.');
     }
   }

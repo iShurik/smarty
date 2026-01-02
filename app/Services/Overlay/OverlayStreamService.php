@@ -107,7 +107,10 @@ class OverlayStreamService
       DonationEvent::create([
         'donation_id' => $event->donation_id,
         'type' => DonationEvent::TYPE_DISPATCHED,
-        'payload_json' => null,
+        'payload_json' => [
+          'source' => 'sse',
+          'streamer_id' => $streamerId,
+        ],
         'created_at' => now(),
       ]);
 
@@ -147,7 +150,10 @@ class OverlayStreamService
         DonationEvent::create([
           'donation_id' => $donation->id,
           'type' => DonationEvent::TYPE_PLAYED,
-          'payload_json' => null,
+          'payload_json' => [
+            'source' => 'sse',
+            'streamer_id' => $profile->id,
+          ],
           'created_at' => now(),
         ]);
       }
