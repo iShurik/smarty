@@ -49,7 +49,7 @@ class OverlayStreamService
           break;
         }
 
-        $payload = $this->claimNextDonationPayload($profile->id);
+    $payload = $this->claimNextDonationPayload($profile->id);
 
         if ($payload) {
           $this->sendEvent('donation', $payload);
@@ -74,31 +74,37 @@ class OverlayStreamService
   private function claimNextDonationPayload(int $streamerId): ?array
   {
     return DB::transaction(function () use ($streamerId): ?array {
-      $donation = Donation::query()
-        ->with(['donor', 'ttsAudio', 'youtubeCache', 'memeClip.file'])
-        ->where('streamer_id', $streamerId)
-        ->where('status', Donation::STATUS_PAID)
-        ->where(function ($query) {
-          $query->whereNull('voice_id')
-            ->orWhereNotNull('tts_audio_file_id');
+      $event = DonationEvent::query()
+        ->with('donation')
+        ->where('type', DonationEvent::TYPE_BROADCASTED)
+        ->whereHas('donation', function ($query) use ($streamerId) {
+          $query->where('streamer_id', $streamerId);
         })
-        ->whereDoesntHave('events', function ($query) {
-          $query->where('type', DonationEvent::TYPE_BROADCASTED);
+        ->whereDoesntHave('donation.events', function ($query) {
+          $query->where('type', DonationEvent::TYPE_PLAYED);
         })
         ->orderBy('id')
         ->lockForUpdate()
         ->first();
 
-      if (! $donation) {
+      if (! $event || ! $event->donation) {
         return null;
       }
 
-      $payload = $this->payloadService->make($donation);
+      if ($event->donation->status !== Donation::STATUS_PAID) {
+        return null;
+      }
+
+      $payload = $event->payload_json;
+
+      if (! is_array($payload) || $payload === []) {
+        $payload = $this->payloadService->make($event->donation);
+      }
 
       DonationEvent::create([
-        'donation_id' => $donation->id,
-        'type' => DonationEvent::TYPE_BROADCASTED,
-        'payload_json' => $payload,
+        'donation_id' => $event->donation_id,
+        'type' => DonationEvent::TYPE_PLAYED,
+        'payload_json' => null,
         'created_at' => now(),
       ]);
 

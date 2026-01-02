@@ -10,6 +10,8 @@ class DonationOverlayPayloadService
 {
   public function make(Donation $donation): array
   {
+    $donation->loadMissing(['donor', 'ttsAudio', 'youtubeCache', 'memeClip.file', 'goal']);
+
     $donorName = $donation->donor_name
       ?? $donation->donor?->name
       ?? 'Guest';
@@ -19,47 +21,35 @@ class DonationOverlayPayloadService
       'donor_name' => $donorName,
       'amount' => $donation->amount,
       'currency' => $donation->currency,
-      'message_text' => $donation->message_text,
-      'country_warning' => $donation->country_warning,
-      'created_at' => $donation->created_at,
+      'text' => $donation->message_text,
     ];
 
     if ($donation->ttsAudio) {
-      $payload['tts_audio'] = $this->mediaPayload($donation->ttsAudio);
+      $payload['tts_audio_url'] = $this->mediaUrl($donation->ttsAudio);
     }
 
     if ($donation->youtubeCache) {
-      $payload['youtube'] = [
-        'id' => $donation->youtubeCache->youtube_id,
-        'title' => $donation->youtubeCache->title,
-        'channel_title' => $donation->youtubeCache->channel_title,
-        'views' => $donation->youtubeCache->views,
-        'duration_sec' => $donation->youtubeCache->duration_sec,
-        'url' => 'https://www.youtube.com/watch?v='.$donation->youtubeCache->youtube_id,
-      ];
+      $payload['youtube_url'] = 'https://www.youtube.com/watch?v='.$donation->youtubeCache->youtube_id;
     }
 
     if ($donation->memeClip && $donation->memeClip->file) {
-      $payload['meme_clip'] = [
-        'id' => $donation->memeClip->id,
-        'title' => $donation->memeClip->title,
-        'duration_sec' => $donation->memeClip->duration_sec,
-        'file' => $this->mediaPayload($donation->memeClip->file),
+      $payload['meme_clip_url'] = $this->mediaUrl($donation->memeClip->file);
+    }
+
+    if ($donation->goal) {
+      $payload['goal_progress'] = [
+        'goal_id' => $donation->goal->id,
+        'current_amount' => $donation->goal->current_amount,
+        'target_amount' => $donation->goal->target_amount,
+        'currency' => $donation->goal->currency,
       ];
     }
 
     return $payload;
   }
 
-  private function mediaPayload(MediaFile $mediaFile): array
+  private function mediaUrl(MediaFile $mediaFile): string
   {
-    return [
-      'id' => $mediaFile->id,
-      'disk' => $mediaFile->disk,
-      'path' => $mediaFile->path,
-      'mime_type' => $mediaFile->mime_type,
-      'size_bytes' => $mediaFile->size_bytes,
-      'url' => Storage::disk($mediaFile->disk)->url($mediaFile->path),
-    ];
+    return Storage::disk($mediaFile->disk)->url($mediaFile->path);
   }
 }

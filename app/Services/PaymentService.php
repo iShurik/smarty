@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\DonationBroadcastJob;
 use App\Jobs\TtsGenerateJob;
 use App\Models\Donation;
 use App\Models\DonationEvent;
@@ -77,6 +78,8 @@ class PaymentService
 
       if ($this->shouldGenerateTts($donation)) {
         TtsGenerateJob::dispatch($donation->id)->afterCommit();
+      } else {
+        DonationBroadcastJob::dispatch($donation->id)->afterCommit();
       }
     });
   }

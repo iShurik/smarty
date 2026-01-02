@@ -4,14 +4,14 @@ namespace App\Jobs;
 
 use App\Models\Donation;
 use App\Models\DonationEvent;
-use App\Services\TtsService;
+use App\Services\Overlay\DonationOverlayPayloadService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class TtsGenerateJob implements ShouldQueue
+class DonationBroadcastJob implements ShouldQueue
 {
   use Dispatchable;
   use InteractsWithQueue;
@@ -20,13 +20,13 @@ class TtsGenerateJob implements ShouldQueue
 
   public function __construct(public int $donationId)
   {
-    $this->onQueue((string) config('tts.queue', 'tts'));
+    $this->onQueue((string) config('overlay.queue', 'notifications'));
   }
 
-  public function handle(TtsService $ttsService): void
+  public function handle(DonationOverlayPayloadService $payloadService): void
   {
     $donation = Donation::query()
-      ->with(['voice', 'ttsAudio'])
+      ->with(['donor', 'ttsAudio', 'youtubeCache', 'memeClip.file', 'goal'])
       ->find($this->donationId);
 
     if (! $donation) {
@@ -37,27 +37,25 @@ class TtsGenerateJob implements ShouldQueue
       return;
     }
 
-    if ($donation->tts_audio_file_id) {
+    if ($donation->voice_id !== null && ! $donation->tts_audio_file_id) {
       return;
     }
 
-    $mediaFile = $ttsService->generateForDonation($donation);
+    $alreadyBroadcasted = $donation->events()
+      ->where('type', DonationEvent::TYPE_BROADCASTED)
+      ->exists();
 
-    if (! $mediaFile) {
+    if ($alreadyBroadcasted) {
       return;
     }
+
+    $payload = $payloadService->make($donation);
 
     DonationEvent::create([
       'donation_id' => $donation->id,
-      'type' => DonationEvent::TYPE_TTS_READY,
-      'payload_json' => [
-        'media_file_id' => $mediaFile->id,
-        'disk' => $mediaFile->disk,
-        'path' => $mediaFile->path,
-      ],
+      'type' => DonationEvent::TYPE_BROADCASTED,
+      'payload_json' => $payload,
       'created_at' => now(),
     ]);
-
-    DonationBroadcastJob::dispatch($donation->id);
   }
 }
