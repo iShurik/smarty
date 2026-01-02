@@ -51,4 +51,9 @@ class StreamerProfile extends Model
   {
     return $this->hasMany(Goal::class, 'streamer_id');
   }
+
+  public function donations(): HasMany
+  {
+    return $this->hasMany(Donation::class, 'streamer_id');
+  }
 }

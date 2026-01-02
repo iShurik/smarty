@@ -9,6 +9,7 @@ use App\Http\Controllers\MockPaymentController;
 use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\PublicStreamerController;
 use App\Http\Controllers\Streamer\StreamerGoalController;
+use App\Http\Controllers\Streamer\StreamerDonationController;
 use App\Http\Controllers\Streamer\StreamerRulesController;
 use App\Http\Controllers\Streamer\StreamerProfileController;
 use App\Http\Controllers\TtsVoiceController;
@@ -30,6 +31,7 @@ Route::prefix('v1')->group(function (): void {
     Route::get('profile', [StreamerProfileController::class, 'show']);
     Route::put('profile', [StreamerProfileController::class, 'update']);
     Route::apiResource('goals', StreamerGoalController::class)->except(['create', 'edit']);
+    Route::post('donations/{donation}/reject', [StreamerDonationController::class, 'reject']);
     Route::get('rules', [StreamerRulesController::class, 'show']);
     Route::put('rules/allowed-voices', [StreamerRulesController::class, 'updateAllowedVoices']);
     Route::put('rules/banned-meme-tags', [StreamerRulesController::class, 'updateBannedMemeTags']);

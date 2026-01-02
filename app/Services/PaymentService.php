@@ -56,7 +56,7 @@ class PaymentService
 
       $donation = $payment->donation;
 
-      if (! $donation || $donation->status === Donation::STATUS_PAID) {
+      if (! $donation || $donation->status !== Donation::STATUS_PENDING_PAYMENT) {
         return;
       }
 
