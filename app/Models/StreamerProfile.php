@@ -45,5 +45,10 @@ class StreamerProfile extends Model
   public function bannedYoutubeVideos(): HasMany
   {
     return $this->hasMany(StreamerBannedYoutubeVideo::class, 'streamer_id');
-  }    
+  }
+
+  public function goals(): HasMany
+  {
+    return $this->hasMany(Goal::class, 'streamer_id');
+  }
 }
